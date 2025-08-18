@@ -2,6 +2,7 @@ import fs from 'fs'
 import imagekit from '../configs/imagekit.js'
 import Story from '../models/Story.js'
 import User from '../models/User.js'
+import { inngest } from '../inngest/index.js'
 
 
 //Add user story
@@ -13,7 +14,7 @@ export const addUserStory = async (req,res) => {
         let media_url = ''
 
         //upload media to imagekit
-        if(media_type == 'image' || media_type == 'video'){
+        if(media_type === 'image' || media_type === 'video'){
             const fileBuffer = fs.readFileSync(media.path)
             const response = await imagekit.upload({
                 file:fileBuffer,
@@ -29,6 +30,14 @@ export const addUserStory = async (req,res) => {
             media_type,
             background_color
         })
+
+        //Schedule story deletion after 24 hours
+        await inngest.send({
+            name: 'app/story.delete',
+            data: { storyId: story._id}
+        })
+
+        res.json({success:true})
 
     } catch (error) {
         console.log(error)

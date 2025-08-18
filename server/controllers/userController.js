@@ -2,6 +2,8 @@ import Connection from "../models/Connection.js"
 import User from "../models/User.js"
 import Post from "../models/Post.js"
 import fs from 'fs'
+import { inngest } from '../inngest/index.js'
+import imagekit from "../configs/imagekit.js"
 
 
 //Get User Data using userId
@@ -199,10 +201,16 @@ export const sendConnectionRequest = async (req, res) => {
         })
 
         if (!connection) {
-            await Connection.create({
+            const newConnection = await Connection.create({
                 from_user_id: userId,
                 to_user_id: id
             })
+
+            await inngest.send({
+                name: 'app/connection-request',
+                data: {connectionId: newConnection._id}
+            })
+
             return res.json({ success: true, message: 'Connection request sent successfully' })
         } else if (connection && connection.status === 'accepted') {
             return res.json({ success: false, message: 'You are already connected with the user' })
