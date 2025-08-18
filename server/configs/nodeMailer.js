@@ -1,6 +1,5 @@
 import nodemailer from 'nodemailer'
 
-
 //Create the transporter object using SMTP settings
 const transporter = nodemailer.createTransport({
   host: "smtp-relay.brevo.com",
