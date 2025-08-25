@@ -28,7 +28,7 @@ export const updateUserData = async (req, res) => {
     try {
 
         const { userId } = req.auth()
-        const { username, bio, location, Full_name } = req.body
+        const { username, bio, location, full_name } = req.body
 
         const tempUser = await User.findById(userId)
 
@@ -153,7 +153,6 @@ export const followUser = async (req, res) => {
         console.log(error)
         res.json({ success: false, message: error.message })
     }
-
 }
 
 // unFollow User
@@ -235,7 +234,7 @@ export const getUserConnections = async (req, res) => {
         const followers = user.followers
         const following = user.following
 
-        const pendingConnections = (await Connection.find({ from_user_id: userId, status: 'pending' }).populate('from_user_id')).map(connection => connection.from_user_id)
+        const pendingConnections = (await Connection.find({ to_user_id: userId, status: 'pending' }).populate('from_user_id')).map(connection => connection.from_user_id)
 
         res.json({success:true,connections, followers, following, pendingConnections})
 
