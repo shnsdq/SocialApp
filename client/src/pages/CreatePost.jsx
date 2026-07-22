@@ -3,6 +3,7 @@ import { dummyUserData } from '../assets/assets'
 import { Image, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
+import { useAuth } from '@clerk/react'
 
 const CreatePost = () => {
 
@@ -12,8 +13,21 @@ const CreatePost = () => {
 
     const user = useSelector((state) => state.user.value);
 
-    const handleSubmit = async () => {
+    const {getToken} = useAuth()
 
+    const handleSubmit = async () => {
+      if(!image.length && !content)
+         return toast.error('Please add some content or images')
+
+      setLoading(true)
+
+      const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
+
+      try {
+        
+      } catch (error) {
+        
+      }
     }
 
   return (
