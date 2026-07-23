@@ -4,9 +4,12 @@ import { Image, X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useSelector } from 'react-redux'
 import { useAuth } from '@clerk/react'
+import api from '../api/axios'
+import { useNavigate } from 'react-router-dom'
 
 const CreatePost = () => {
-
+ 
+    const navigate = useNavigate()
     const [content,setContent] = useState('')
     const [images,setImages] = useState([])
     const [loading,setLoading] = useState(false)
@@ -24,10 +27,27 @@ const CreatePost = () => {
       const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
 
       try {
-        
+        const formData = new FormData();
+        formData.append('content', content)
+        formData.append('postType', postType)
+        images.map((image)=> {
+          formData.append('images', image)
+        })
+
+        const {data} = await api.post('/api/post/add', formData, {headers:{
+          Authorization: `Bearer ${await getToken()}`}})
+
+          if(data.success){
+             navigate('/')
+          }else{
+            console.log(data.message)
+            throw new Error(data.message)
+          }
       } catch (error) {
-        
+        console.error(error.message)
+        throw new Error(error.message)
       }
+      setLoading(false)
     }
 
   return (
