@@ -1,18 +1,21 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Users, UserPlus, UserCheck, UserRoundPen, MessageSquare } from 'lucide-react'
-import {
-  dummyConnectionsData as connections,
-  dummyFollowersData as followers,
-  dummyFollowingData as following,
-  dummyPendingConnectionsData as pendingConnections
-} from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { useSelector,useDispatch } from 'react-redux'
+import { useAuth } from '@clerk/react'
+import { fetchConnections } from '../features/connections/connectionsSlice'
+import api from '../api/axios'
+import toast from 'react-hot-toast'
 
 const Connections = () => {
 
   const [currentTab, setCurrentTab] = useState('Followers')
 
   const navigate = useNavigate()
+  const {getToken} = useAuth()
+  const dispatch = useDispatch()
+
+  const {connections, pendingConnections, followers, following} = useSelector((state) => state.connections)
 
   const dataArray = [
     { label: 'Follower', value: followers, icon: Users },
@@ -20,6 +23,29 @@ const Connections = () => {
     { label: 'Pending', value: pendingConnections, icon: UserRoundPen },
     { label: 'Connections', value: connections, icon: UserPlus }
   ]
+
+  const handleUnfollow = async (userId) => {
+    try{
+      const {data} = await api.post('/api/user/unfollow', {id:userId},{
+        headers: {Authorization: `Bearer ${await getToken()}`}
+      })
+      if (data.success){
+        toast.success(data.message)
+        dispatch(fetchConnections(await getToken()))
+      }else{
+        toast(data.message)
+      }
+    }catch(error){
+      toast.error(error.message)
+    }
+  }
+
+  useEffect(() => {
+    getToken().then((token) => {
+      // Fetch connections data using the token
+      dispatch(fetchConnections(token))
+    })
+  }, [])
 
   return (
     <div className='min-h-screen bg-slate-50'>
