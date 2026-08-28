@@ -10,11 +10,12 @@ import Discover from './pages/Discover'
 import Profile from './pages/Profile'
 import CreatePost from './pages/CreatePost'
 import {useAuth, useUser} from '@clerk/react'
-import {Toaster} from 'react-hot-toast'
+import toast, {Toaster} from 'react-hot-toast'
 import {useDispatch} from 'react-redux'
 import {fetchUser} from './features/user/userSlice'
 import { fetchConnections } from './features/connections/connectionsSlice'
 import { addMessage } from './features/messages/messagesSlice'
+import Notification from './components/Notification'
 
 const App = () => {
   const {user} = useUser()
@@ -47,12 +48,13 @@ const App = () => {
       eventSource.onmessage = (event) => {
         const data = JSON.parse(event.data)
 
-        if(pathnameRef.current === ('/messages/' + message.from_user_id.id)){
+        if(pathnameRef.current === ('/messages/' + message.from_user_id._id)){
           dispatch(addMessage(message))
         }else{
-
+           toast.custom(()=>(
+            <Notification t={t} message={message} />
+           ),{position:"bottom-right"})
         }
-        // Handle incoming events
       }
       return()=>{
         eventSource.close()
